@@ -259,7 +259,7 @@ export default function Home() {
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddRecord}
         students={students}
-        selectedStudentId={activeStudentId}
+        selectedStudentId={activeStudentId || undefined}
       />
 
       <EditRecordModal
