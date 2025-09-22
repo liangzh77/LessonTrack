@@ -52,17 +52,22 @@ export class LessonTrackDB {
       return LocalKV.addStudent(name)
     }
 
-    const student: Student = {
-      id: `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name,
-      createdAt: new Date().toISOString()
+    try {
+      const student: Student = {
+        id: `student_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name,
+        createdAt: new Date().toISOString()
+      }
+
+      const students = await this.getStudents()
+      students.push(student)
+      await kv.set(this.STUDENTS_KEY, students)
+
+      return student
+    } catch (error) {
+      console.error('Vercel KV addStudent error:', error)
+      throw new Error(`添加学生失败: ${error instanceof Error ? error.message : '未知错误'}`)
     }
-
-    const students = await this.getStudents()
-    students.push(student)
-    await kv.set(this.STUDENTS_KEY, students)
-
-    return student
   }
 
   static async deleteStudent(studentId: string): Promise<void> {
