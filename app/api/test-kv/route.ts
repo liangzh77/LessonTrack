@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 
-// 使用 Upstash Redis SDK
-const redis = Redis.fromEnv()
+// 明确指定环境变量
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 
 export async function GET() {
   try {
