@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
 
-// 明确配置 KV 客户端
-const kv = createClient({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-})
+// 使用 Upstash Redis SDK
+const redis = Redis.fromEnv()
 
 export async function GET() {
   try {
@@ -14,13 +11,13 @@ export async function GET() {
     const testValue = { timestamp: Date.now(), test: true }
 
     // 写入测试
-    await kv.set(testKey, testValue)
+    await redis.set(testKey, testValue)
 
     // 读取测试
-    const result = await kv.get(testKey)
+    const result = await redis.get(testKey)
 
     // 清理测试数据
-    await kv.del(testKey)
+    await redis.del(testKey)
 
     return NextResponse.json({
       success: true,

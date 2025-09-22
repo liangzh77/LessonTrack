@@ -1,10 +1,7 @@
-import { createClient } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
 
-// 明确配置 KV 客户端
-const kv = createClient({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-})
+// 使用 Upstash Redis SDK
+const redis = Redis.fromEnv()
 import { LocalKV } from './kv-local'
 
 export interface Student {
@@ -45,7 +42,7 @@ export class LessonTrackDB {
     }
 
     try {
-      const students = await kv.get<Student[]>(this.STUDENTS_KEY)
+      const students = await redis.get<Student[]>(this.STUDENTS_KEY)
       return students || []
     } catch (error) {
       console.error('获取学生列表失败:', error)
@@ -67,7 +64,7 @@ export class LessonTrackDB {
 
       const students = await this.getStudents()
       students.push(student)
-      await kv.set(this.STUDENTS_KEY, students)
+      await redis.set(this.STUDENTS_KEY, students)
 
       return student
     } catch (error) {
@@ -83,11 +80,11 @@ export class LessonTrackDB {
 
     const students = await this.getStudents()
     const updatedStudents = students.filter(s => s.id !== studentId)
-    await kv.set(this.STUDENTS_KEY, updatedStudents)
+    await redis.set(this.STUDENTS_KEY, updatedStudents)
 
     const records = await this.getLessonRecords()
     const updatedRecords = records.filter(r => r.studentId !== studentId)
-    await kv.set(this.RECORDS_KEY, updatedRecords)
+    await redis.set(this.RECORDS_KEY, updatedRecords)
   }
 
   static async getLessonRecords(filter?: LessonFilter): Promise<LessonRecord[]> {
@@ -96,7 +93,7 @@ export class LessonTrackDB {
     }
 
     try {
-      let records = await kv.get<LessonRecord[]>(this.RECORDS_KEY) || []
+      let records = await redis.get<LessonRecord[]>(this.RECORDS_KEY) || []
 
       if (filter) {
         if (filter.studentId) {
@@ -133,7 +130,7 @@ export class LessonTrackDB {
 
     const records = await this.getLessonRecords()
     records.push(newRecord)
-    await kv.set(this.RECORDS_KEY, records)
+    await redis.set(this.RECORDS_KEY, records)
 
     return newRecord
   }
@@ -151,7 +148,7 @@ export class LessonTrackDB {
     }
 
     records[recordIndex] = { ...records[recordIndex], ...updates }
-    await kv.set(this.RECORDS_KEY, records)
+    await redis.set(this.RECORDS_KEY, records)
 
     return records[recordIndex]
   }
@@ -163,7 +160,7 @@ export class LessonTrackDB {
 
     const records = await this.getLessonRecords()
     const updatedRecords = records.filter(r => r.id !== recordId)
-    await kv.set(this.RECORDS_KEY, updatedRecords)
+    await redis.set(this.RECORDS_KEY, updatedRecords)
   }
 
   static async getStatistics(studentId?: string, startDate?: string, endDate?: string) {
