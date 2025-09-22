@@ -26,11 +26,20 @@ export async function GET() {
       }, {} as Record<string, string>)
   }
 
+  // 构建实际使用的 Redis URL
+  function buildRedisUrl(baseUrl: string): string {
+    if (baseUrl.includes('/v1/request')) {
+      return baseUrl
+    }
+    return `${baseUrl.replace(/\/$/, '')}/v1/request`
+  }
+
   // 提供详细的令牌信息（安全地显示前缀）
   const tokenInfo = {
     KV_REST_API_TOKEN_LENGTH: process.env.KV_REST_API_TOKEN?.length || 0,
     KV_REST_API_TOKEN_PREFIX: process.env.KV_REST_API_TOKEN?.substring(0, 20) || '未设置',
-    KV_REST_API_URL_FULL: process.env.KV_REST_API_URL || '未设置'
+    KV_REST_API_URL_RAW: process.env.KV_REST_API_URL || '未设置',
+    KV_REST_API_URL_PROCESSED: process.env.KV_REST_API_URL ? buildRedisUrl(process.env.KV_REST_API_URL) : '未设置'
   }
 
   return NextResponse.json({
