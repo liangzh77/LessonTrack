@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
+import { createClient } from '@vercel/kv'
+
+// 明确配置 KV 客户端
+const kv = createClient({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 
 export async function GET() {
   try {
@@ -23,7 +29,9 @@ export async function GET() {
       environment: {
         NODE_ENV: process.env.NODE_ENV,
         hasKvUrl: !!process.env.KV_REST_API_URL,
-        hasKvToken: !!process.env.KV_REST_API_TOKEN
+        hasKvToken: !!process.env.KV_REST_API_TOKEN,
+        kvUrlPrefix: process.env.KV_REST_API_URL?.substring(0, 30) + '...',
+        tokenPrefix: process.env.KV_REST_API_TOKEN?.substring(0, 10) + '...'
       }
     })
   } catch (error) {
@@ -34,7 +42,9 @@ export async function GET() {
       environment: {
         NODE_ENV: process.env.NODE_ENV,
         hasKvUrl: !!process.env.KV_REST_API_URL,
-        hasKvToken: !!process.env.KV_REST_API_TOKEN
+        hasKvToken: !!process.env.KV_REST_API_TOKEN,
+        kvUrlPrefix: process.env.KV_REST_API_URL?.substring(0, 30) + '...',
+        tokenPrefix: process.env.KV_REST_API_TOKEN?.substring(0, 10) + '...'
       }
     }, { status: 500 })
   }

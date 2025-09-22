@@ -1,4 +1,10 @@
-import { kv } from '@vercel/kv'
+import { createClient } from '@vercel/kv'
+
+// 明确配置 KV 客户端
+const kv = createClient({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+})
 import { LocalKV } from './kv-local'
 
 export interface Student {
